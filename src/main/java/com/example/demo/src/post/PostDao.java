@@ -22,7 +22,7 @@ public class PostDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    // 게시물 리스트 조회
+    // 게시물들 조회
     public List<GetPostsRes> selectPosts(int userIdx){
         String selectPostsQuery =
                 "SELECT p.postIdx as postIdx,\n" +
@@ -85,7 +85,7 @@ public class PostDao {
                 ), selectPostsParam);
     }
 
-    // 유저 확인
+    // 유저 확인 (validation)
     public int checkUserExist(int userIdx){
         String checkUserExistQuery = "select exists(select userIdx from User where userIdx = ?)";
         int checkUserExistParams = userIdx;
@@ -94,7 +94,7 @@ public class PostDao {
                 checkUserExistParams);
     }
 
-    // 게시물 확인
+    // 게시물 확인 (validation)
     public int checkPostExist(int postIdx){
         String checkPostExistQuery = "select exists(select postIdx from Post where postIdx = ?)";
         int checkPostExistParams = postIdx;
@@ -103,12 +103,22 @@ public class PostDao {
                 checkPostExistParams);
     }
 
+    // 유저의 게시물인지 확인
+    public int checkUserPostExist(int userIdx, int postIdx){
+        String checkUserPostQuery = "select exists(select postIdx from Post where postIdx = ? and userIdx=?) ";
+        Object[]  checkUserPostParams = new Object[]{postIdx,userIdx};
+        return this.jdbcTemplate.queryForObject(checkUserPostQuery,
+                int.class,
+                checkUserPostParams);
+    }
+
     // 게시글 작성
     public int insertPosts(int userIdx, String content){
         String insertPostQuery = "INSERT INTO Post(userIdx, content) VALUES (?,?);";
         Object[] insertPostParams = new Object[] {userIdx, content};
         this.jdbcTemplate.update(insertPostQuery, insertPostParams);
 
+        // 방금 들어간 postIdx 리턴
         String lastInsertIdxQuery = "select last_insert_id()";
         return this.jdbcTemplate.queryForObject(lastInsertIdxQuery, int.class);
     }
@@ -123,12 +133,14 @@ public class PostDao {
         return this.jdbcTemplate.queryForObject(lastInsertIdxQuery, int.class);
     }
 
+    // 게시물 수정
     public int updatePost(int postIdx, String content){
         String updatePostQuery = "UPDATE Post SET content=? WHERE postIdx=?";
         Object[] updatePostParams = new Object[] {content, postIdx};
         return this.jdbcTemplate.update(updatePostQuery, updatePostParams);
     }
 
+    // 게시물 삭제
     public int deletePost(int postIdx){
         String deletePostQuery = "UPDATE Post SET status='INACTIVE' WHERE postIdx=?";
         Object[] deletePostParams = new Object[] {postIdx};

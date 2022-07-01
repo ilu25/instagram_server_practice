@@ -30,8 +30,8 @@ public class JwtService {
                 .setHeaderParam("type","jwt")
                 .claim("userIdx",userIdx)   // payload
                 .setIssuedAt(now)
-                .setExpiration(new Date(System.currentTimeMillis()+1*(1000*60*60*24*365)))
-                .signWith(SignatureAlgorithm.HS256, Secret.JWT_SECRET_KEY)
+                .setExpiration(new Date(System.currentTimeMillis()+1*(1000*60*60*24*365)))  // 만료기간
+                .signWith(SignatureAlgorithm.HS256, Secret.JWT_SECRET_KEY)     // 알고리즘 & JWT 인코딩해주는 비밀키
                 .compact();
     }
 

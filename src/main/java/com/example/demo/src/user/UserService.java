@@ -34,7 +34,7 @@ public class UserService {
 
     }
 
-
+    // 유저 생성
     public PostUserRes createUser(PostUserReq postUserReq) throws BaseException {
         // 이메일 중복 확인
         if(userProvider.checkEmail(postUserReq.getEmail()) ==1){
@@ -54,23 +54,28 @@ public class UserService {
             String jwt = jwtService.createJwt(userIdx);     //jwt 발급.
             return new PostUserRes(jwt,userIdx);
         } catch (Exception exception) {
-            log.error(exception.getMessage());
+            // log.error(exception.getMessage());
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
-    public void modifyUserName(PatchUserReq patchUserReq) throws BaseException {
+    // 프로필 수정
+    public void modifyProfile(int userIdx, PatchUserReq patchUserReq) throws BaseException {
+        if (userProvider.checkUserExist(userIdx) ==0){
+            throw new BaseException(USERS_EMPTY_USER_ID);
+        }
+
         try{
-            int result = userDao.modifyUserName(patchUserReq);
+            int result = userDao.updateProfile(userIdx, patchUserReq);
             if(result == 0){
-                throw new BaseException(MODIFY_FAIL_USERNAME);
+                throw new BaseException(MODIFY_FAIL_USERPROFILE);
             }
         } catch(Exception exception){
             throw new BaseException(DATABASE_ERROR);
         }
     }
 
-    // 회원 삭제
+    // 유저 삭제
     public void deleteUser(int userIdx) throws BaseException {
         if(userProvider.checkUserExist(userIdx) == 0){
             throw new BaseException(USERS_EMPTY_USER_ID);

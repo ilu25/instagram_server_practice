@@ -31,6 +31,7 @@ public class AuthService {
 
     }
 
+    // 로그인
     public PostLoginRes logIn(PostLoginReq postLoginReq) throws BaseException {
         User user = authDao.getPwd(postLoginReq);
         String encryptPwd;      // 새로 받은 비번 암호화 (SHA256에 있는 암호화 알고리즘 사용)
@@ -39,7 +40,7 @@ public class AuthService {
             encryptPwd = new SHA256().encrypt(postLoginReq.getPwd());
         }
         catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
+            throw new BaseException(PASSWORD_ENCRYPTION_ERROR);
         }
         if (user.getPwd().equals(encryptPwd)) {
             int userIdx = user.getUserIdx();

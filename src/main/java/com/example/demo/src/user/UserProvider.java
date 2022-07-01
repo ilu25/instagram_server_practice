@@ -33,7 +33,7 @@ public class UserProvider {
         this.jwtService = jwtService;
     }
 
-
+    // 유저 피드 조회
     public GetUserFeedRes retrieveUserFeed(int userIdxByJwt, int userIdx) throws BaseException{
         Boolean isMyFeed = true;
 
@@ -53,18 +53,7 @@ public class UserProvider {
         }
     }
 
-
-    public GetUserRes getUsersByIdx(int userIdx) throws BaseException{
-        try{
-            GetUserRes getUsersRes = userDao.getUsersByIdx(userIdx);
-            return getUsersRes;
-        }
-        catch (Exception exception) {
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
-
-
+    // 이메일 확인
     public int checkEmail(String email) throws BaseException{
         try{
             return userDao.checkEmail(email);
@@ -73,6 +62,7 @@ public class UserProvider {
         }
     }
 
+    // 유저 여부 확인
     public int checkUserExist(int userIdx) throws BaseException{
         try{
             return userDao.checkUserExist(userIdx);

@@ -35,6 +35,7 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
+    // 로그인
     @ResponseBody
     @PostMapping("/login")
     public BaseResponse<PostLoginRes> logIn(@RequestBody PostLoginReq postLoginReq) {
@@ -52,7 +53,7 @@ public class AuthController {
             PostLoginRes postLoginRes = authService.logIn(postLoginReq);
             return new BaseResponse<>(postLoginRes);
         } catch (BaseException exception) {
-            log.error(exception.getMessage());
+            // log.error(exception.getMessage());   로그인 시 pwd 크기 작아서 오류 났었음
             return new BaseResponse<>((exception.getStatus()));
         }
     }

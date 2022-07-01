@@ -34,12 +34,16 @@ public class PostController {
         this.jwtService = jwtService;
     }
 
-    // 게시물 리스트 조회
+    // 게시물들 조회
     @ResponseBody
     @GetMapping("")
     public BaseResponse<List<GetPostsRes>> getPosts(@RequestParam int userIdx) {
         try {
-            List<GetPostsRes> getPostsRes = postProvider.retrievePosts(userIdx);
+            int userIdxByJwt = jwtService.getUserIdx();
+            if (userIdx != userIdxByJwt) {
+                return new BaseResponse<>(INVALID_USER_JWT);
+            }
+            List<GetPostsRes> getPostsRes = postProvider.retrievePosts(userIdxByJwt);
             return new BaseResponse<>(getPostsRes);
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
@@ -63,7 +67,7 @@ public class PostController {
             }
 
             // userIdx 따로 빼는 이유는 jwt로 받을 때 편리
-            PostPostsRes postPostsRes = postService.createPosts(postPostsReq.getUserIdx(), postPostsReq);
+            PostPostsRes postPostsRes = postService.createPosts(userIdxByJwt, postPostsReq);
             return new BaseResponse<>(postPostsRes);
         } catch (BaseException exception) {
             return new BaseResponse<>((exception.getStatus()));
@@ -75,12 +79,16 @@ public class PostController {
     @PatchMapping("/{postIdx}")
     public BaseResponse<String> modifyPost(@PathVariable ("postIdx") int postIdx, @RequestBody PatchPostsReq patchPostsReq) {
         try {
+            int userIdxByJwt = jwtService.getUserIdx();
+            if (patchPostsReq.getUserIdx() != userIdxByJwt) {
+                return new BaseResponse<>(INVALID_USER_JWT);
+            }
             if (patchPostsReq.getContent().length() > 450) {     // 게시물 글자수 제한
                 return new BaseResponse<>(BaseResponseStatus.POST_POSTS_INVALID_CONTENTS);
             }
 
             // userIdx 따로 빼는 이유는 jwt로 받을 때 편리
-            postService.modifyPost(patchPostsReq.getUserIdx(), postIdx, patchPostsReq);
+            postService.modifyPost(userIdxByJwt, postIdx, patchPostsReq);
             String result = "게시물 정보 수정을 완료하였습니다.";
             return new BaseResponse<>(result);
         } catch (BaseException exception) {
@@ -93,7 +101,8 @@ public class PostController {
     @PatchMapping("/{postIdx}/status")
     public BaseResponse<String> deletePost(@PathVariable ("postIdx") int postIdx) {
         try {
-            postService.deletePost(postIdx);
+            int userIdxByJwt = jwtService.getUserIdx();
+            postService.deletePost(userIdxByJwt, postIdx);
             String result = "삭제를 성공했습니다.";
             return new BaseResponse<>(result);
         } catch (BaseException exception) {

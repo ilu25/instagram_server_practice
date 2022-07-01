@@ -30,7 +30,7 @@ public class PostProvider {
         this.jwtService = jwtService;
     }
 
-    // 게시물 리스트 조회
+    // 게시물들 조회
     public List<GetPostsRes> retrievePosts(int userIdx) throws BaseException {
         if (checkUserExist(userIdx) == 0) {
             throw new BaseException(USERS_EMPTY_USER_ID);
@@ -43,6 +43,7 @@ public class PostProvider {
         }
     }
 
+    // 유저 확인 (validation)
     public int checkUserExist(int userIdx) throws BaseException {
         try {
             return postDao.checkUserExist(userIdx);
@@ -51,10 +52,20 @@ public class PostProvider {
         }
     }
 
+    // 게시물 확인 (validation)
     public int checkPostExist(int postIdx) throws BaseException {
         try {
             return postDao.checkPostExist(postIdx);
         } catch (Exception exception) {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    // 유저의 게시물인지 확인
+    public int checkUserPostExist(int userIdx,int postIdx) throws BaseException{
+        try{
+            return postDao.checkUserPostExist(userIdx,postIdx);
+        } catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
         }
     }

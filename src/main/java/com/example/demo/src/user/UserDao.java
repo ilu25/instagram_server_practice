@@ -19,7 +19,8 @@ public class UserDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    public GetUserInfoRes selectUserInfo(int userIdx){
+    // 유저 정보
+   public GetUserInfoRes selectUserInfo(int userIdx){
         String selectUserInfoQuery = "SELECT User.userIdx,\n" +
                 "       nickName,\n" +
                 "       name,\n" +
@@ -57,15 +58,18 @@ public class UserDao {
                 ), selectUserInfoParam);
     }
 
+    // 유저의 게시물들
     public List<GetUserPostsRes> selectUserPosts(int userIdx){
         String selectUserPostsQuery =
-                " SELECT p.postIdx as postIdx,\n" +
+                "SELECT p.postIdx as postIdx,\n" +
                         "       pi.imgUrl as postImgUrl\n" +
                         "FROM Post as p\n" +
                         "    join PostImgUrl as pi on pi.postIdx = p.postIdx and pi.status = 'ACTIVE'\n" +
                         "    join User as u on u.userIdx = p.userIdx\n" +
                         "WHERE p.status = 'ACTIVE' and u.userIdx = ?\n" +
-                        "order by p.postIdx;";
+                        "group by p.postIdx\n" +
+                        "HAVING min(pi.postImgUrlIdx)\n" +
+                        "order by p.postIdx desc;";
         int selectUserPostsParam = userIdx;
         return this.jdbcTemplate.query(selectUserPostsQuery,
                 (rs,rowNum) -> new GetUserPostsRes(
@@ -74,31 +78,7 @@ public class UserDao {
                 ), selectUserPostsParam);
     }
 
-    public GetUserRes getUsersByEmail(String email){
-        String getUsersByEmailQuery = "select userIdx,name,nickName,email from User where email=?";
-        String getUsersByEmailParams = email;
-        return this.jdbcTemplate.queryForObject(getUsersByEmailQuery,
-                (rs, rowNum) -> new GetUserRes(
-                        rs.getInt("userIdx"),
-                        rs.getString("name"),
-                        rs.getString("nickName"),
-                        rs.getString("email")),
-                getUsersByEmailParams);
-    }
-
-
-    public GetUserRes getUsersByIdx(int userIdx){
-        String getUsersByIdxQuery = "select userIdx,name,nickName,email from User where userIdx=?";
-        int getUsersByIdxParams = userIdx;
-        return this.jdbcTemplate.queryForObject(getUsersByIdxQuery,
-                (rs, rowNum) -> new GetUserRes(
-                        rs.getInt("userIdx"),
-                        rs.getString("name"),
-                        rs.getString("nickName"),
-                        rs.getString("email")),
-                getUsersByIdxParams);
-    }
-
+    // 유저 생성
     public int createUser(PostUserReq postUserReq){
         String createUserQuery = "insert into User (email,name,pwd,birth,nickName) values (?,?,?,?,?)";
         Object[] createUserParams = new Object[]{postUserReq.getEmail(),postUserReq.getName() ,postUserReq.getPwd(), postUserReq.getBirth(),postUserReq.getNickName()};
@@ -108,6 +88,7 @@ public class UserDao {
         return this.jdbcTemplate.queryForObject(lastInsertIdQuery, int.class);
     }
 
+    // 이메일 확인
     public int checkEmail(String email){
         String checkEmailQuery = "select exists(select email from User where email = ?)";
         String checkEmailParams = email;
@@ -126,14 +107,16 @@ public class UserDao {
                 checkUserExistParams);
     }
 
-    public int modifyUserName(PatchUserReq patchUserReq){
-        String modifyUserNameQuery = "update User set nickName = ? where userIdx = ? ";
-        Object[] modifyUserNameParams = new Object[]{patchUserReq.getNickName(), patchUserReq.getUserIdx()};
+    // 프로필 변경
+    public int updateProfile(int userIdx, PatchUserReq patchUserReq){
+        String updateProfileQuery = "update User set profileImgUrl=?, name=?, nickName = ?, website=?, introduction=? where userIdx = ?";
+        Object[] updateProfileParams = new Object[]{patchUserReq.getProfileImgUrl(), patchUserReq.getName(),
+                patchUserReq.getNickName(), patchUserReq.getWebsite(), patchUserReq.getIntroduction(), userIdx};
 
-        return this.jdbcTemplate.update(modifyUserNameQuery,modifyUserNameParams);
+        return this.jdbcTemplate.update(updateProfileQuery, updateProfileParams);
     }
 
-    // 회원 삭제
+    // 유저 삭제
     public int updateUserStatus(int userIdx){
         String deleteUserQuery = "update User set status='INACTIVE' where userIdx = ? ";
         Object[] deleteUserParams = new Object[]{userIdx};

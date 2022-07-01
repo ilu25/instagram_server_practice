@@ -25,17 +25,20 @@ public enum BaseResponseStatus {
     // users
     USERS_EMPTY_USER_ID(false, 2010, "유저 아이디 값을 확인해주세요."),
 
-    // [POST] /users
+    // [POST] /users + /auth/login
     POST_USERS_EMPTY_EMAIL(false, 2015, "이메일을 입력해주세요."),
     POST_USERS_INVALID_EMAIL(false, 2016, "이메일 형식을 확인해주세요."),
     POST_USERS_EXISTS_EMAIL(false,2017,"중복된 이메일입니다."),
 
+    // posts
         // 형식적 validation
     POST_POSTS_INVALID_CONTENTS(false, 2018, "내용의 글자수를 확인해주세요."),
     POST_POSTS_EMPTY_IMGURL(false, 2019, "게시물의 이미지를 입력해주세요."),
 
         // 의미적 validation
     POSTS_EMPTY_POST_ID(false, 2020, "게시물 아이디 값을 확인해주세요."),
+    POSTS_EMPTY_USER_POST(false, 2021, "유저의 게시물이 아닙니다."),
+
 
     // [POST] /auth/login
     POST_USERS_EMPTY_PASSWORD(false, 2030, "비밀번호를 입력해주세요."),
@@ -61,7 +64,7 @@ public enum BaseResponseStatus {
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
 
     //[PATCH] /users/{userIdx}
-    MODIFY_FAIL_USERNAME(false,4014,"유저네임 수정 실패"),
+    MODIFY_FAIL_USERPROFILE(false,4014,"유저 프로필 수정 실패"),
 
     //[DELETE] /users/{userIdx}
     DELETE_FAIL_USER(false,4016,"유저 삭제 실패"),

@@ -33,6 +33,7 @@ public class PostService {
 
     }
 
+    // 게시물 생성
     public PostPostsRes createPosts(int userIdx, PostPostsReq postPostsReq) throws BaseException {
         try {
            int postIdx = postDao.insertPosts(userIdx, postPostsReq.getContent());
@@ -46,14 +47,17 @@ public class PostService {
         }
     }
 
+    // 게시물 수정 (내용만 수정 가능)
     public void modifyPost(int userIdx, int postIdx, PatchPostsReq patchPostsReq) throws BaseException {
         if (postProvider.checkUserExist(userIdx) == 0) {
             throw new BaseException(USERS_EMPTY_USER_ID);
         }
-        if (postProvider.checkPostExist(userIdx) == 0) {
+        if (postProvider.checkPostExist(postIdx) == 0) {
             throw new BaseException(POSTS_EMPTY_POST_ID);
         }
-
+        if (postProvider.checkUserPostExist(userIdx, postIdx)==0){
+            throw new BaseException(POSTS_EMPTY_USER_POST);
+        }
         try {
             // DAO에서 성공 시 1, 아니면 0 리턴
             int result = postDao.updatePost(postIdx, patchPostsReq.getContent());
@@ -66,7 +70,17 @@ public class PostService {
         }
     }
 
-    public void deletePost(int postIdx) throws BaseException {
+    // 게시물 삭제
+    public void deletePost(int userIdx, int postIdx) throws BaseException {
+        if (postProvider.checkUserExist(userIdx) ==0){
+            throw new BaseException(USERS_EMPTY_USER_ID);
+        }
+        if (postProvider.checkPostExist(postIdx) == 0) {
+            throw new BaseException(POSTS_EMPTY_POST_ID);
+        }
+        if (postProvider.checkUserPostExist(userIdx, postIdx)==0){
+            throw new BaseException(POSTS_EMPTY_USER_POST);
+        }
         try {
             // DAO에서 성공 시 1, 아니면 0 리턴
             int result = postDao.deletePost(postIdx);
